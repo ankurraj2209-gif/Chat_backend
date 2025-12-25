@@ -1,2 +1,2 @@
 # Chat_backend
-Implemented websocket
+Implemented websocket logic for 2 way communication
