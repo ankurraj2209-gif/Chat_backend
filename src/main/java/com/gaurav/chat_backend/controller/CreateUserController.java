@@ -17,8 +17,8 @@ public class CreateUserController {
        this.createUserService = createUserService;
     }
     @PostMapping
-    public ResponseEntity<String> createUser(@RequestBody String name) {
-        createUserService.createUser(name);
+    public ResponseEntity<String> createUser(@RequestBody String username) {
+        createUserService.createUser(username);
         return ResponseEntity.ok().body("User created");
     }
 
