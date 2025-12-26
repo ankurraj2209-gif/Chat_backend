@@ -18,7 +18,7 @@ Requestbody{
 
 WebSocket Connection Flow :-
 
-1. The initial connection is made using an HTTP request, which is then upgraded to a WebSocket connection during the         handshake phase.
+1.The initial connection is made using an HTTP request, which is then upgraded to a WebSocket connection during the         handshake phase.
 http://localhost:8080/ws-test.html?userId=1 (html page need to be created so test.html is proxy)
 
 2.HandshakeInterceptor (Authentication)
@@ -46,15 +46,30 @@ SEND /app/chat.send
   "to": "2",
   "content": "Hello"
 }**
-Backend Processing
+6.Backend Processing
+ChatController receives the message
+@MessageMapping("/chat.send")
+public void send(ChatMessage message, Principal principal)
 Sender is resolved from Principal
-Message is saved in DB
-Message is delivered in real time using:
-convertAndSendToUser(
-    receiverId,
-    "/queue/messages",
-    payload
+
+7.Message persistence (Database)
+Before delivery:Message is saved in DB
+Stores:
+sender object
+receiver object
+message
+timestamp
+
+ Database is the source of truth.
+
+8.Real-time delivery using user routing
+messagingTemplate.convertAndSendToUser(
+receiverId,
+"/queue/messages",
+payload
 );
+Spring internally routes this to:
+/user/2/queue/messages
 Only the intended receiver gets the message.
 
 Bidirectional Chat :-
@@ -63,15 +78,25 @@ Same endpoint handles:
 user1 → user2
 user2 → user1
 
-6. Chat History (REST API)
+9.Online / Offline User Status
+
+Online status is determined by active WebSocket sessions.
+
+SessionConnectEvent → user is ONLINE
+SessionDisconnectEvent → user is OFFLINE
+
+Check User Status (REST)
+GET /users/{userId}/status
+
+10.Chat History (REST API)
 Endpoint
 GET /chat/history?user1=1&user2=2
 
 
-....... Design Decisions.........
-Authentication handled at handshake
-WebSocket used for real-time only
-Database is source of truth.
-Controller → Service → Repository separation
+    ....... Design Decisions.........
+   Authentication handled at handshake.
+   WebSocket used for real-time only.
+   Database is source of truth. 
+   Controller → Service → Repository separation.
 
 
